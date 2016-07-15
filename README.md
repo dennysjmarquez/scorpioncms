@@ -14,8 +14,8 @@ Demo: <http://www.scorpioncms.webdeveloperes.ml/>
 
 Área del administrador: <http://www.scorpioncms.webdeveloperes.ml/admin/>
 
-Introducción
-------------
+Instalación e instrucción
+-------------------------
 
 		A:
 	
