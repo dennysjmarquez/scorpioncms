@@ -14,10 +14,6 @@ Demo: <http://www.scorpioncms.webdeveloperes.ml/>
 
 Área del administrador: <http://www.scorpioncms.webdeveloperes.ml/admin/>
 
-    Usuario  : demo
-    password : demo
-    
-
 Introducción
 ------------
 
@@ -60,6 +56,9 @@ Introducción
 			EL USUARIO Y EL PASSWORD DEL ADMIN
 			-------------------------------------------
 				
+				Usuario  : demo
+				password : demo
+    
 				NOTA: En este archivo se puede generar
 				un password diferente si así se
 				necesitara
