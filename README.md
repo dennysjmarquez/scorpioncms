@@ -7,8 +7,8 @@
      |_____/ \_____\____/|_|  \_\_|   |_____\____/|_| \_|   \_____|_|  |_|_____/ 
 
 
-Scorpion CMS
-============
+Scorpion CMS-Blogger
+====================
 
 Demo: <http://www.scorpioncms.webdeveloperes.ml/>
 
