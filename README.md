@@ -82,3 +82,30 @@ Instalación e instrucción
 			/admin/
 			
 			-------------------------------------------
+			
+			
+		E:
+	
+		
+			------------------------------------------
+			LA CONFIGURACION DE MOD_REWRITE:
+			------------------------------------------
+			
+				NOTA:	En algunos hosting gratis hay problemas
+				con los subdominios y el uso de sin www. 
+				si es asi activar estas lineas
+				
+				## RewriteCond %{HTTPS} off
+				## RewriteCond %{HTTP_HOST} !^www\.
+				## RewriteRule ^(.*)$ http://www.%{HTTP_HOST}/$1 [L,R=301]
+				
+				RewriteCond %{HTTPS} off
+				RewriteCond %{HTTP_HOST} !^www\.
+				RewriteRule ^(.*)$ http://www.%{HTTP_HOST}/$1 [L,R=301]				
+
+			-------------------------------------------			
+			
+			>>----->	.htaccess
+   
+			-----------------------------------------
+		
