@@ -40,6 +40,12 @@
     <!-- AdminLTE App -->
     <script src="<?php get_template_directory_uri_admin(); ?>/js/app.js"></script>
 
+	<script type="text/javascript">
+		var searchWinHref = window.location.href;
+		if(searchWinHref.indexOf("?ckattempt") > -1) {
+			window.location.href = window.location.href.split('?')[0];
+		}
+	</script>
 		
 		<?php if(isset($msg)) echo msg($msg); ?>	
 	

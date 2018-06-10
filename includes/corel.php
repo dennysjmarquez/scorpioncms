@@ -51,11 +51,13 @@ class Corel {
 		$this->Query = $Query;
 		$this->suf_post = get_config("suf_post");
 		$this->suf_category = get_config("suf_category");
-		
-		$url = $_SERVER['REQUEST_URI'];
-				
 		$router = new router;
-		$EstructuraSegmentada = $router->GetEstructura($url);
+		
+		$EstructuraSegmentada = $router->GetEstructura(
+		
+			(strstr($_SERVER['REQUEST_URI'], '?', true)) ? strstr($_SERVER['REQUEST_URI'], '?', true) : $_SERVER['REQUEST_URI']
+		
+		);
 		
 		$this->Resgistrar_estructura();
 		$this->Check_Estructura($EstructuraSegmentada);

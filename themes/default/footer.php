@@ -145,5 +145,6 @@
 
     <script src="<?php get_template_directory_uri(); ?>/js/app.js"></script>
 
+	
 </body>
 </html>

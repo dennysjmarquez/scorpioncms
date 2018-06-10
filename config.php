@@ -37,7 +37,7 @@ return [
             'port'      => 3306,
             'dbname'  => 'scorpioncms',
             'user'  => 'root',
-            'password'  => '',
+            'password'  => '1234',
             'charset'   => 'utf8'
         ],
 

@@ -6,8 +6,8 @@
 
     RewriteEngine On
 
-    RewriteBase /scorpioncms
-
+    #RewriteBase /scorpioncms
+	
 	##
 	## redireccionar sin www a www
 	##
@@ -16,9 +16,10 @@
 	## si es asi activar estas lineas y cambiar 
 	## el dominio y subdominios por el correcto
 	##
-	## RewriteCond %{HTTPS} off
-	## RewriteCond %{HTTP_HOST} !^www\.
-	## RewriteRule ^(.*)$ http://www.%{HTTP_HOST}/$1 [L,R=301]
+	##RewriteCond %{HTTPS} off
+	##RewriteCond %{HTTP_HOST} !^www\.
+	##RewriteRule ^(.*)$ http://www.%{HTTP_HOST}/$1 [L,R=301]
+	
 	
     ##
     ## La lista negra de archivos protegidos

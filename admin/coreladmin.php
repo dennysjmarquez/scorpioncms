@@ -32,11 +32,13 @@ class CorelAdmin {
 		$this->themesG = $themes;
 		$Cache->Check();
 		$this->Query = $Query;
-                
-		$url = $_SERVER['REQUEST_URI'];
-		
 		$router = new router;
-		$EstructuraSegmentada = $router->GetEstructura($url, "admin");
+		
+		$EstructuraSegmentada = $router->GetEstructura(
+			
+			(strstr($_SERVER['REQUEST_URI'], '?', true)) ? strstr($_SERVER['REQUEST_URI'], '?', true) : $_SERVER['REQUEST_URI']
+		
+		, "admin");		
 		
 		if (count($EstructuraSegmentada) >= 4) {
 			

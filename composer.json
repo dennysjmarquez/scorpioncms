@@ -1,0 +1,24 @@
+{
+	
+	"name": "contentsys",
+	"description": "contentsys",
+	"type": "project",
+	"authors": [
+	{
+		"name": "Dennys José Márquez Reyes",
+		"email": "dennysjmarquez@gmail.com"
+		
+	}
+	],
+	"require": {
+		"doctrine/dbal": "^2.5"
+	},
+	"autoload":{
+		"psr-4":{
+		}
+	}
+	
+}
+
+
+
