@@ -110,7 +110,7 @@
 		
 	}
 	
-	function the_content($value){
+	function the_content($value = null){
 		
 		global $Query;
 		echo $Query->the_content($value);
