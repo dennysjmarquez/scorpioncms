@@ -1,0 +1,1 @@
+<h1>El Tema >>> <?=get_config('current_theme')?> <<< no es operativo, solo es de ejemplo para ver las funciones del administrador de temas del Admin</h1>

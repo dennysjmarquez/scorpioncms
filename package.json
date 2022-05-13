@@ -1,0 +1,27 @@
+{
+  "name": "scorpioncms",
+  "version": "1.2.1",
+  "description": "Un CMS-Blogger que está en su primera etapa, maneja themes y más adelante manejara Plugins componentes y demás muy al estilo de WordPress pero orientado a MVC",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dennysjmarquez/scorpioncms.git"
+  },
+  "keywords": [
+    "cms-blogger",
+    "wordpress",
+    "cms",
+    "doctrine",
+    "dbal",
+    "php"
+  ],
+  "author": "Dennys José Márquez Reyes",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dennysjmarquez/scorpioncms/issues"
+  },
+  "homepage": "https://github.com/dennysjmarquez/scorpioncms#scorpion-cms"
+}
