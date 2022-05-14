@@ -130,7 +130,7 @@ function slug_str_split($string)
 
     for ($i = 0; $i < $slen; $i++) {
 
-        $sArray[$i] = $string{$i};
+        $sArray[$i] = $string[$i];
 
     }
 

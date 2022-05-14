@@ -257,7 +257,7 @@ class DbTreeExt extends DbTree
      * @return array Needed fields
      * @throws \Doctrine\DBAL\DBALException
      */
-    function Ajar($nodeId, $_fields, $_condition, $set_table)
+    function Ajar(int $nodeId, $_fields, $_condition, $set_table)
     {
         $fields = empty($_fields) ? '*' : $_fields;
         $condition = empty($_condition) ? '' : $_condition;
@@ -305,7 +305,7 @@ class DbTreeExt extends DbTree
      * @param integer $id - Parent's ID.
      * @param string $orderField - the name of the field on which sorting will go
      */
-    public function SortChildren($id, $orderField, $set_table)
+    public function SortChildren(int $id, string $orderField, $set_table)
     {
         $node = $this->GetNode($id);
         $data = $this->Branch(
@@ -353,7 +353,7 @@ class DbTreeExt extends DbTree
      * @param string $_set_table
      * @return string - UL/LI html code
      */
-    public function MakeUlList($tree, $nameField, $_linkField, $_linkPrefix, $_delimiter, $_set_table)
+    public function MakeUlList(array $tree, string $nameField, array $_linkField, string $_linkPrefix, string $_delimiter, string $_set_table)
     {
 
         $linkField = empty($_linkField) ? [] : $_linkField;

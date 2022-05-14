@@ -70,7 +70,7 @@ function mysql2date($format, $date, $translate = false)
 }
 
 if (function_exists("str_contains") === false) {
-    function str_contains($haystack, $needles)
+    function str_contains($haystack, $needles): bool
     {
 
         foreach ((array)$needles as $needle) {
