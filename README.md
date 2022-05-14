@@ -10,9 +10,9 @@
 Scorpion CMS-Blogger
 ====================
 
-Demo: <http://www.scorpioncms.webdeveloperes.ml/>
+Demo: <https://scorpioncms.herokuapp.com/>
 
-Área del administrador: <http://www.scorpioncms.webdeveloperes.ml/admin/>
+Área del administrador: <https://scorpioncms.herokuapp.com/admin/>
 
 Instalación e instrucción
 -------------------------
