@@ -11,15 +11,16 @@ class DbTreeExt extends DbTree
      */
     protected $db;
     public $TreeTotal;
-	public $IdRoot = [];
+    public $IdRoot = [];
 
     /**
      * Constructor.
      *
      */
-    public function __construct() {
+    public function __construct()
+    {
 
-		global $dbh;
+        global $dbh;
         $this->db = $dbh;
         parent:: __construct($this->db);
 
@@ -33,93 +34,98 @@ class DbTreeExt extends DbTree
      * @throws \Doctrine\DBAL\DBALException
      */
 
-	private function TreeTotal($set_table) {
+    private function TreeTotal($set_table)
+    {
 
-		$result = $this->db->prepare("SELECT COUNT(*) total FROM " . $set_table);
+        $result = $this->db->prepare("SELECT COUNT(*) total FROM " . $set_table);
 
-		$result->execute();
-		$result = $result->fetch();
-		$result = $result["total"];
-		$this->TreeTotal = $result;
-		return $result;
+        $result->execute();
+        $result = $result->fetch();
+        $result = $result["total"];
+        $this->TreeTotal = $result;
+        return $result;
 
-	} public function get_root_node($set_table){
+    }
 
-		$result = $this->db->prepare("SELECT * FROM " . $set_table . " WHERE `level` = 0 ");
-		$result->execute();
-		$result = $result->fetchall();
+    public function get_root_node($set_table)
+    {
 
-		if($result){
+        $result = $this->db->prepare("SELECT * FROM " . $set_table . " WHERE `level` = 0 ");
+        $result->execute();
+        $result = $result->fetchall();
 
-			$this->IdRoot[$set_table] = isset($this->IdRoot[$set_table]) ? $this->IdRoot[$set_table] :  $result[0]['id'];
+        if ($result) {
 
-		}
+            $this->IdRoot[$set_table] = isset($this->IdRoot[$set_table]) ? $this->IdRoot[$set_table] : $result[0]['id'];
+
+        }
 
         return $result[0];
 
-	} public function get_single_to_id($set_table, $value = null){
+    }
 
-		if(null === $value) return;
+    public function get_single_to_id($set_table, $value = null)
+    {
 
-		$result = $this->db->prepare("SELECT * FROM " . $set_table . " WHERE id = :id");
-		$result->bindParam(':id', $value, PDO::PARAM_INT);
-		$result->execute();
-		$result = $result->fetchall();
+        if (null === $value) return;
 
-		return $result;
+        $result = $this->db->prepare("SELECT * FROM " . $set_table . " WHERE id = :id");
+        $result->bindParam(':id', $value, PDO::PARAM_INT);
+        $result->execute();
+        $result = $result->fetchall();
 
-
-
-	}
-
-    public function Full($set_table, $value = 1, $vlimit = true, $EexcludeDefault = false) {
-
-		global $QueryAdmin;
-
-		if ($vlimit === true){
-
-			$TreeTotal = $this->TreeTotal($set_table);
-			@$totaldepaginas = ceil( $TreeTotal / get_config("posts_per_page") );
-			if($value > $totaldepaginas) return false;
-
-			$offset = ( ( $value - 1 ) * (int)get_config("posts_per_page") );
-			$limit = (int)get_config("posts_per_page");
-
-			$result = $this->db->prepare("SELECT * FROM " . $set_table . " ORDER BY lft ASC LIMIT :offset, :limit");
-			$result->bindParam(':offset', $offset, PDO::PARAM_INT);
-			$result->bindParam(':limit', $limit, PDO::PARAM_INT);
-
-		}elseif ($vlimit === false){
-
-			$result = $this->db->prepare("SELECT * FROM " . $set_table . " ORDER BY lft ASC");
-
-		}
-
-		$result->execute();
-		$result = $result->fetchall();
-		$newresult = [];
+        return $result;
 
 
+    }
 
-		foreach($result as $item){
+    public function Full($set_table, $value = 1, $vlimit = true, $EexcludeDefault = false)
+    {
 
-			if($EexcludeDefault === false && (int)$item['level'] === 0){
+        global $QueryAdmin;
 
-				$item['name'] = ('_'.$item['name'] === lang_s('_'.$item['name'],true)) ? $item['name'] : lang_s('_'.$item['name'],true);
-				$newresult[] = $item;
+        if ($vlimit === true) {
 
-			}elseif($EexcludeDefault === true && (int)$item['level'] !== 0){
+            $TreeTotal = $this->TreeTotal($set_table);
+            @$totaldepaginas = ceil($TreeTotal / get_config("posts_per_page"));
+            if ($value > $totaldepaginas) return false;
 
-				$newresult[] = $item;
+            $offset = (($value - 1) * (int)get_config("posts_per_page"));
+            $limit = (int)get_config("posts_per_page");
 
-			}elseif($EexcludeDefault === false && (int)$item['level'] !== 0 ){
+            $result = $this->db->prepare("SELECT * FROM " . $set_table . " ORDER BY lft ASC LIMIT :offset, :limit");
+            $result->bindParam(':offset', $offset, PDO::PARAM_INT);
+            $result->bindParam(':limit', $limit, PDO::PARAM_INT);
 
-				$newresult[] = $item;
+        } elseif ($vlimit === false) {
 
-			}
+            $result = $this->db->prepare("SELECT * FROM " . $set_table . " ORDER BY lft ASC");
 
-		}
+        }
 
+        $result->execute();
+        $result = $result->fetchall();
+        $newresult = [];
+
+
+        foreach ($result as $item) {
+
+            if ($EexcludeDefault === false && (int)$item['level'] === 0) {
+
+                $item['name'] = ('_' . $item['name'] === lang_s('_' . $item['name'], true)) ? $item['name'] : lang_s('_' . $item['name'], true);
+                $newresult[] = $item;
+
+            } elseif ($EexcludeDefault === true && (int)$item['level'] !== 0) {
+
+                $newresult[] = $item;
+
+            } elseif ($EexcludeDefault === false && (int)$item['level'] !== 0) {
+
+                $newresult[] = $item;
+
+            }
+
+        }
 
 
         return $newresult;
@@ -129,12 +135,15 @@ class DbTreeExt extends DbTree
      * Returns all elements of a branch starting from an element with number $nodeId.
      *
      * @param integer $nodeId Node unique id
-     * @param string|array $fields Fields to be selected
-     * @param string|array $condition array key - condition (AND, OR, etc), value - condition string
+     * @param string|array $_fields Fields to be selected
+     * @param string|array $_condition array key - condition (AND, OR, etc), value - condition string
      * @return array Needed fields
      */
-    function Branch($nodeId, $fields = '*', $condition = '', $set_table)
+    function Branch($nodeId, $_fields, $_condition, $set_table)
     {
+
+        $fields = empty($_fields) ? '*' : $_fields;
+        $condition = empty($_condition) ? '' : $_condition;
 
         $condition = $this->PrepareCondition($condition, false, 'A.');
         $fields = $this->PrepareSelectFields($fields, 'A');
@@ -147,56 +156,54 @@ class DbTreeExt extends DbTree
         $result = $this->db->getInd("id", $sql);
 
 
-
-
         return $result;
     }
 
-	public function checkExitsName($set_table, $nodeId, $name){
+    public function checkExitsName($set_table, $nodeId, $name)
+    {
 
-		$nodeId = ((int)$nodeId === -1) ? 0 : (int)$nodeId;
+        $nodeId = ((int)$nodeId === -1) ? 0 : (int)$nodeId;
 
-		$result = $this->db->prepare("SELECT `name` FROM {$set_table} WHERE parent_id = :nodeId AND name = :name LIMIT 1");
-		$result->bindParam(':nodeId', $nodeId, PDO::PARAM_INT);
-		$result->bindParam(':name', $name, PDO::PARAM_STR);
-		$result->execute();
-		$result = $result->fetch();
-
-
-
-		if($result) {
-			return true;
-		}else{
-			return false;
-		}
+        $result = $this->db->prepare("SELECT `name` FROM {$set_table} WHERE parent_id = :nodeId AND name = :name LIMIT 1");
+        $result->bindParam(':nodeId', $nodeId, PDO::PARAM_INT);
+        $result->bindParam(':name', $name, PDO::PARAM_STR);
+        $result->execute();
+        $result = $result->fetch();
 
 
-	}
-
-	public function get_parent_id($set_table, $nodeId){
-
-		$result = $this->db->prepare("SELECT `parent_id` FROM {$set_table} WHERE id = :nodeId ");
-		$result->bindParam(':nodeId', $nodeId, PDO::PARAM_INT);
-		$result->execute();
-		$result = $result->fetch();
-
-		if($result){
-
-			$result = $result['parent_id'];
-
-		}else{
-
-			$result = null;
-		}
+        if ($result) {
+            return true;
+        } else {
+            return false;
+        }
 
 
-		return $result;
+    }
 
-	}
+    public function get_parent_id($set_table, $nodeId)
+    {
+
+        $result = $this->db->prepare("SELECT `parent_id` FROM {$set_table} WHERE id = :nodeId ");
+        $result->bindParam(':nodeId', $nodeId, PDO::PARAM_INT);
+        $result->execute();
+        $result = $result->fetch();
+
+        if ($result) {
+
+            $result = $result['parent_id'];
+
+        } else {
+
+            $result = null;
+        }
+
+
+        return $result;
+
+    }
 
     /**
      * Returns all parents of element with number $nodeId.
-
      * @param $set_table
      * @param integer $nodeId Node unique id
      * @return array Needed fields
@@ -205,38 +212,38 @@ class DbTreeExt extends DbTree
     function Parents($set_table, $nodeId)
     {
 
-		//$result = $this->db->prepare("SELECT A.id, A.lft, A.rgt, A.level, A.*, CASE WHEN A.lft + 1 < A.rgt THEN 1 ELSE 0 END AS nflag FROM {$set_table} B, {$set_table} A WHERE B.id = :nodeId AND B.lft BETWEEN A.lft AND A.rgt ORDER BY A.lft");
+        //$result = $this->db->prepare("SELECT A.id, A.lft, A.rgt, A.level, A.*, CASE WHEN A.lft + 1 < A.rgt THEN 1 ELSE 0 END AS nflag FROM {$set_table} B, {$set_table} A WHERE B.id = :nodeId AND B.lft BETWEEN A.lft AND A.rgt ORDER BY A.lft");
 
-		if ((int)$nodeId === (int)$this->get_root_node($set_table)['id']){
+        if ((int)$nodeId === (int)$this->get_root_node($set_table)['id']) {
 
-			$result = $this->db->prepare("SELECT * FROM {$set_table} WHERE id = :nodeId ");
-			$result->bindParam(':nodeId', $nodeId, PDO::PARAM_INT);
+            $result = $this->db->prepare("SELECT * FROM {$set_table} WHERE id = :nodeId ");
+            $result->bindParam(':nodeId', $nodeId, PDO::PARAM_INT);
 
 
-		}else{
+        } else {
 
-			$result = $this->db->prepare("SELECT A.id, A.lft, A.rgt, A.level, A.*, A.lft + 1 < A.rgt FROM {$set_table} B, {$set_table} A WHERE B.id = :nodeId AND A.lft > 1 AND B.lft BETWEEN A.lft AND A.rgt ORDER BY A.lft");
-			$result->bindParam(':nodeId', $nodeId, PDO::PARAM_INT);
+            $result = $this->db->prepare("SELECT A.id, A.lft, A.rgt, A.level, A.*, A.lft + 1 < A.rgt FROM {$set_table} B, {$set_table} A WHERE B.id = :nodeId AND A.lft > 1 AND B.lft BETWEEN A.lft AND A.rgt ORDER BY A.lft");
+            $result->bindParam(':nodeId', $nodeId, PDO::PARAM_INT);
 
-		}
+        }
 
-		$result->execute();
+        $result->execute();
 
-		$result = $result->fetchall();
+        $result = $result->fetchall();
 
-		$newresult = [];
+        $newresult = [];
 
-		foreach($result as $item){
+        foreach ($result as $item) {
 
-			if ((int)$item['level'] === 0){
+            if ((int)$item['level'] === 0) {
 
-				$item['name'] = ('_'.$item['name'] === lang_s('_'.$item['name'],true)) ? $item['name'] : lang_s('_'.$item['name'],true);
+                $item['name'] = ('_' . $item['name'] === lang_s('_' . $item['name'], true)) ? $item['name'] : lang_s('_' . $item['name'], true);
 
-			}
+            }
 
-			$newresult[] = $item;
+            $newresult[] = $item;
 
-		}
+        }
 
         return $newresult;
     }
@@ -245,13 +252,16 @@ class DbTreeExt extends DbTree
      * Returns a slightly opened tree from an element with number $nodeId.
      *
      * @param integer $nodeId Node unique id
-     * @param string|array $fields Fields to be selected
-     * @param string|array $condition array key - condition (AND, OR, etc), value - condition string
+     * @param string|array $_fields Fields to be selected
+     * @param string|array $_condition array key - condition (AND, OR, etc), value - condition string
      * @return array Needed fields
      * @throws \Doctrine\DBAL\DBALException
      */
-    function Ajar($nodeId, $fields = '*', $condition = '', $set_table)
+    function Ajar($nodeId, $_fields, $_condition, $set_table)
     {
+        $fields = empty($_fields) ? '*' : $_fields;
+        $condition = empty($_condition) ? '' : $_condition;
+
         $condition = $this->PrepareCondition($condition, false, 'A.');
 
         $sql = 'SELECT A.lft, A.rgt, A.level ';
@@ -337,13 +347,20 @@ class DbTreeExt extends DbTree
      *
      * @param array $tree - nested sets tree array
      * @param string $nameField - name of field that contains title of URL
-     * @param array $linkField - name of field that contains URL (if needed)
-     * @param null|string $linkPrefix - URL prefix (if needed)
-     * @param string $delimiter - linkField delimiter
+     * @param array $_linkField - name of field that contains URL (if needed)
+     * @param null|string $_linkPrefix - URL prefix (if needed)
+     * @param string $_delimiter - linkField delimiter
+     * @param string $_set_table
      * @return string - UL/LI html code
      */
-    public function MakeUlList($tree, $nameField, $linkField = array(), $linkPrefix = null, $delimiter = '', $set_table)
+    public function MakeUlList($tree, $nameField, $_linkField, $_linkPrefix, $_delimiter, $_set_table)
     {
+
+        $linkField = empty($_linkField) ? [] : $_linkField;
+        $linkPrefix = empty($_linkPrefix) ? null : $_linkPrefix;
+        $delimiter = empty($_delimiter) ? '' : $_delimiter;
+        $set_table = empty($_set_table) ? '' : $_set_table;
+
         $current_depth = 0;
         $node_depth = 0;
         $counter = 0;
@@ -369,7 +386,7 @@ class DbTreeExt extends DbTree
             if (!empty($linkField)) {
                 $link_data = array();
                 $linkField = !is_array($linkField) ? array($linkField) : $linkField;
-                foreach($linkField as $field) {
+                foreach ($linkField as $field) {
                     $link_data[] = $node[$field];
                 }
 
