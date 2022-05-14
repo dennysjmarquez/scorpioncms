@@ -2,10 +2,12 @@
 
 class DbTreeExt extends DbTree
 {
+
     /**
+     *
      * Database layer object.
      *
-     * @var db
+     * @var $db
      */
     protected $db;
     public $TreeTotal;
@@ -14,26 +16,23 @@ class DbTreeExt extends DbTree
     /**
      * Constructor.
      *
-     * @param array $fields See description of "DbTree" class properties
-     * @param object $db Database layer
-     * @param string $lang Current language for messaging
      */
     public function __construct() {
 
 		global $dbh;
         $this->db = $dbh;
         parent:: __construct($this->db);
-		
+
     }
 
     /**
      * Returns all elements of the tree sorted by "left".
      *
-     * @param string|array $fields Fields to be selected
-     * @param string|array $condition array key - condition (AND, OR, etc), value - condition string
+     * @param $set_table
      * @return array Needed fields
+     * @throws \Doctrine\DBAL\DBALException
      */
-	 
+
 	private function TreeTotal($set_table) {
 
 		$result = $this->db->prepare("SELECT COUNT(*) total FROM " . $set_table);
@@ -43,86 +42,86 @@ class DbTreeExt extends DbTree
 		$result = $result["total"];
 		$this->TreeTotal = $result;
 		return $result;
-	
+
 	} public function get_root_node($set_table){
-		
+
 		$result = $this->db->prepare("SELECT * FROM " . $set_table . " WHERE `level` = 0 ");
 		$result->execute();
 		$result = $result->fetchall();
-		
+
 		if($result){
-		
-			$this->IdRoot[$set_table] = isset($this->IdRoot[$set_table]) ? $this->IdRoot[$set_table] :  $result[0]['id'];	
-			
+
+			$this->IdRoot[$set_table] = isset($this->IdRoot[$set_table]) ? $this->IdRoot[$set_table] :  $result[0]['id'];
+
 		}
 
         return $result[0];
-		
+
 	} public function get_single_to_id($set_table, $value = null){
-		
+
 		if(null === $value) return;
 
 		$result = $this->db->prepare("SELECT * FROM " . $set_table . " WHERE id = :id");
 		$result->bindParam(':id', $value, PDO::PARAM_INT);
 		$result->execute();
 		$result = $result->fetchall();
-		
+
 		return $result;
-		
-		
-		
+
+
+
 	}
-	
+
     public function Full($set_table, $value = 1, $vlimit = true, $EexcludeDefault = false) {
-		
+
 		global $QueryAdmin;
 
 		if ($vlimit === true){
-		
+
 			$TreeTotal = $this->TreeTotal($set_table);
 			@$totaldepaginas = ceil( $TreeTotal / get_config("posts_per_page") );
 			if($value > $totaldepaginas) return false;
-			
+
 			$offset = ( ( $value - 1 ) * (int)get_config("posts_per_page") );
 			$limit = (int)get_config("posts_per_page");
-		
+
 			$result = $this->db->prepare("SELECT * FROM " . $set_table . " ORDER BY lft ASC LIMIT :offset, :limit");
 			$result->bindParam(':offset', $offset, PDO::PARAM_INT);
 			$result->bindParam(':limit', $limit, PDO::PARAM_INT);
-		
+
 		}elseif ($vlimit === false){
 
 			$result = $this->db->prepare("SELECT * FROM " . $set_table . " ORDER BY lft ASC");
-			
+
 		}
 
 		$result->execute();
 		$result = $result->fetchall();
 		$newresult = [];
-		
-		
-		
+
+
+
 		foreach($result as $item){
-			
+
 			if($EexcludeDefault === false && (int)$item['level'] === 0){
-				
+
 				$item['name'] = ('_'.$item['name'] === lang_s('_'.$item['name'],true)) ? $item['name'] : lang_s('_'.$item['name'],true);
 				$newresult[] = $item;
-			
+
 			}elseif($EexcludeDefault === true && (int)$item['level'] !== 0){
 
 				$newresult[] = $item;
-				
+
 			}elseif($EexcludeDefault === false && (int)$item['level'] !== 0 ){
-				
+
 				$newresult[] = $item;
-				
+
 			}
-			
+
 		}
-		
-		
-		
+
+
+
         return $newresult;
     }
 
@@ -147,100 +146,98 @@ class DbTreeExt extends DbTree
         $sql .= ' ORDER BY A.lft';
         $result = $this->db->getInd("id", $sql);
 
-		
-		
-		
+
+
+
         return $result;
     }
 
 	public function checkExitsName($set_table, $nodeId, $name){
-	
+
 		$nodeId = ((int)$nodeId === -1) ? 0 : (int)$nodeId;
-	
+
 		$result = $this->db->prepare("SELECT `name` FROM {$set_table} WHERE parent_id = :nodeId AND name = :name LIMIT 1");
 		$result->bindParam(':nodeId', $nodeId, PDO::PARAM_INT);
 		$result->bindParam(':name', $name, PDO::PARAM_STR);
 		$result->execute();
 		$result = $result->fetch();
-		 
-		 
-		 
+
+
+
 		if($result) {
-			return true; 
+			return true;
 		}else{
 			return false;
 		}
-	
-	
+
+
 	}
-	 
+
 	public function get_parent_id($set_table, $nodeId){
-		
+
 		$result = $this->db->prepare("SELECT `parent_id` FROM {$set_table} WHERE id = :nodeId ");
 		$result->bindParam(':nodeId', $nodeId, PDO::PARAM_INT);
 		$result->execute();
 		$result = $result->fetch();
-		
+
 		if($result){
-			
+
 			$result = $result['parent_id'];
-			
+
 		}else{
-			
+
 			$result = null;
 		}
-		
-			
+
+
 		return $result;
-		
+
 	}
 
     /**
      * Returns all parents of element with number $nodeId.
-     *
-     * @param integer $nodeId Node unique id
-     * @param string|array $fields Fields to be selected
-     * @param string|array $condition array key - condition (AND, OR, etc), value - condition string
-     * @return array Needed fields
-     */
 
-	
+     * @param $set_table
+     * @param integer $nodeId Node unique id
+     * @return array Needed fields
+     * @throws \Doctrine\DBAL\DBALException
+     */
     function Parents($set_table, $nodeId)
     {
-		
+
 		//$result = $this->db->prepare("SELECT A.id, A.lft, A.rgt, A.level, A.*, CASE WHEN A.lft + 1 < A.rgt THEN 1 ELSE 0 END AS nflag FROM {$set_table} B, {$set_table} A WHERE B.id = :nodeId AND B.lft BETWEEN A.lft AND A.rgt ORDER BY A.lft");
-		
+
 		if ((int)$nodeId === (int)$this->get_root_node($set_table)['id']){
-			
+
 			$result = $this->db->prepare("SELECT * FROM {$set_table} WHERE id = :nodeId ");
 			$result->bindParam(':nodeId', $nodeId, PDO::PARAM_INT);
 
-		
+
 		}else{
-			
+
 			$result = $this->db->prepare("SELECT A.id, A.lft, A.rgt, A.level, A.*, A.lft + 1 < A.rgt FROM {$set_table} B, {$set_table} A WHERE B.id = :nodeId AND A.lft > 1 AND B.lft BETWEEN A.lft AND A.rgt ORDER BY A.lft");
 			$result->bindParam(':nodeId', $nodeId, PDO::PARAM_INT);
-			
+
 		}
-		
+
 		$result->execute();
-		
-		$result = $result->fetchall();		
-		
+
+		$result = $result->fetchall();
+
 		$newresult = [];
-		
+
 		foreach($result as $item){
-			
+
 			if ((int)$item['level'] === 0){
-				
+
 				$item['name'] = ('_'.$item['name'] === lang_s('_'.$item['name'],true)) ? $item['name'] : lang_s('_'.$item['name'],true);
 
 			}
-			
+
 			$newresult[] = $item;
-			
-		}		
-		
+
+		}
+
         return $newresult;
     }
 
@@ -251,7 +248,7 @@ class DbTreeExt extends DbTree
      * @param string|array $fields Fields to be selected
      * @param string|array $condition array key - condition (AND, OR, etc), value - condition string
      * @return array Needed fields
-     * @throws USER_Exception
+     * @throws \Doctrine\DBAL\DBALException
      */
     function Ajar($nodeId, $fields = '*', $condition = '', $set_table)
     {
@@ -393,4 +390,4 @@ class DbTreeExt extends DbTree
     }
 }
 
-?>
+
