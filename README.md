@@ -10,7 +10,7 @@
 Scorpion CMS-Blogger
 ====================
 
-Demo: <https://scorpioncms.herokuapp.com/>
+Demo: http://scorpioncms.byethost12.com/
 
 Área del administrador: <https://scorpioncms.herokuapp.com/admin/>
 
