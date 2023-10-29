@@ -1,0 +1,32 @@
+# Ignorar la carpeta vendor
+/vendor/
+
+# Ignorar archivos de configuración específicos del entorno
+.env
+
+# Ignorar la carpeta de caché
+/cache/
+
+# Ignorar archivos de registro
+*.log
+
+# Ignorar la carpeta de sesiones
+/sessions/
+
+# Ignorar la carpeta de pruebas
+/tests/
+
+# Ignorar archivos generados por IDEs y editores de texto
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Ignorar archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
