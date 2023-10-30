@@ -1,5 +1,8 @@
 <?php
 
+/**
+ *
+ */
 class DbTree
 {
 
@@ -12,20 +15,14 @@ class DbTree
     protected $db;
 
 
-
     /**
-     * Constructor.
      *
-     * @param array $fields See description of class properties
-     * @param object $db Database layer
-     * @param string $lang Current language for messaging
      */
-    public function __construct($db)
+    public function __construct()
     {
+        global $dbh;
+        $this->db = $dbh;
 
-        $this->db = $db;
-        
-        
     }
 
     /**
@@ -57,28 +54,28 @@ class DbTree
      * @param string|array $fields Fields to be selected
      * @return array All node data
      * @throws USER_Exception
+     * @throws \Doctrine\DBAL\Exception
      */
     public function GetNode($set_table, $nodeId, $fields = '*')
     {
-		
-		if ((int)$nodeId === 0) {
-			
-			$result = $this->get_root_node($set_table);
-		
-		}else{
-			
-			$fields = $this->PrepareSelectFields($fields);
-			
-			$result = $this->db->prepare("SELECT ".$fields." FROM " . $set_table . " WHERE id = :id");
-			$result->bindParam(':id', $nodeId);
-			
-			$result->execute();
-			$result = $result->fetchall();
-			
-			if($result) $result = $result[0];
-			
-		
-		}
+
+        if ((int)$nodeId === 0) {
+
+            $result = $this->get_root_node($set_table);
+
+        } else {
+
+            $fields = $this->PrepareSelectFields($fields);
+
+            $result = $this->db->prepare("SELECT " . $fields . " FROM " . $set_table . " WHERE id = :id");
+            $result->bindValue(':id', $nodeId);
+
+            $result = $result->executeQuery()->fetchAllAssociative();
+
+            if ($result) $result = $result[0];
+
+
+        }
 
         return $result;
     }
@@ -91,25 +88,28 @@ class DbTree
      * @param string|array $condition array key - condition (AND, OR, etc), value - condition string
      * @return array All node data
      * @throws USER_Exception
+     * @throws \Doctrine\DBAL\Exception
      */
     public function GetParent($set_table, $nodeId)
-	{
-
-		$result = $this->db->prepare("SELECT `parent_id` FROM " . $set_table . " WHERE id = :id");
-		$result->bindParam(':id', $nodeId);
-			
-		$result->execute();
-		$result = $result->fetch();
-
-		if($result) $result = $result['parent_id'];
-		
-		return $result;
-	}
-	
-	
-	 public function GetParent2($set_table, $nodeId, $fields = '*', $condition = '')
     {
-			
+
+        $result = $this->db->prepare("SELECT `parent_id` FROM " . $set_table . " WHERE id = :id");
+        $result->bindValue(':id', $nodeId);
+
+        $result = $result->executeQuery()->fetchAssociative();
+
+        if ($result) $result = $result['parent_id'];
+
+        return $result;
+    }
+
+
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function GetParent2($set_table, $nodeId, $fields = '*', $condition = '')
+    {
+
         $condition = $this->PrepareCondition($condition, false, 'A.');
         $fields = $this->PrepareSelectFields($fields, 'A');
 
@@ -123,21 +123,16 @@ class DbTree
         $sql = 'SELECT ' . $fields . ' FROM ' . $set_table . ' AS A';
         $sql .= ' WHERE lft < ' . $left_id . ' AND rgt > ' . $right_id . ' AND level = ' . $level . ' ';
         $sql .= $condition . ' ORDER BY lft';
-		
-		
-		
-		$result = $this->db->prepare($sql);
-		$result->execute();
-		$result = $result->fetchall();
 
 
-        if (empty($result)) {
+        $result = $this->db->prepare($sql);
+        /* if (empty($result)) {
             throw new USER_Exception(DBTREE_NO_ELEMENT, 0);
-        }
+        }*/
 
-        return $result;
+        return $result->executeQuery()->fetchAllAssociative();
     }
-	
+
 
     /**
      * Add new child element to node with number $parentId.
@@ -146,15 +141,16 @@ class DbTree
      * @param array $data Contains parameters for additional fields of a tree (if is): 'filed name' => 'importance'
      * @param string|array $condition array key - condition (AND, OR, etc), value - condition string
      * @return int Inserted element id
+     * @throws \Doctrine\DBAL\Exception
      */
     public function insert($set_table, $parentId, $data = array(), $condition = '')
     {
-		
-		$parentId = ((int)$parentId === -1) ? 0 : (int)$parentId;
-		
-		global $QueryAdmin;
+
+        $parentId = ((int)$parentId === -1) ? 0 : (int)$parentId;
+
+        global $QueryAdmin;
         $node_info = $this->GetNode($set_table, $parentId);
-		
+
         $right_id = (int)$node_info["rgt"];
         $level = $node_info["level"];
 
@@ -165,30 +161,30 @@ class DbTree
         $sql .= 'rgt=CASE WHEN rgt>= :right_id  THEN rgt+2 ELSE rgt END ';
         $sql .= 'WHERE rgt>= :right_id';
         $sql .= $condition;
-		
-		$result = $this->db->prepare($sql);
-		$result->bindParam(':right_id', $right_id, PDO::PARAM_INT);
-		$result->execute();
-		
-		
+
+        $result = $this->db->prepare($sql);
+        $result->bindValue(':right_id', $right_id, PDO::PARAM_INT);
+        $result->executeQuery();
+
+
         $data["lft"] = $right_id;
         $data["rgt"] = $right_id + 1;
         $data["level"] = $level + 1;
-		$data["parent_id"] = $parentId;
-		
-		$SQLInsert = "INSERT INTO ". $set_table ." (".$QueryAdmin->PDOFieldList($data)
-		.") VALUES (".$QueryAdmin->PDOValueList($data).")";
-		
-									
-		$result = $this->db->prepare($SQLInsert);
+        $data["parent_id"] = $parentId;
 
-		foreach ($data as $field => $item) {
-										
-			$result->bindValue(':'.$field, $item);
-									
-		}
-		
-		$result->execute();
+        $SQLInsert = "INSERT INTO " . $set_table . " (" . $QueryAdmin->PDOFieldList($data)
+            . ") VALUES (" . $QueryAdmin->PDOValueList($data) . ")";
+
+
+        $result = $this->db->prepare($SQLInsert);
+
+        foreach ($data as $field => $item) {
+
+            $result->bindValue(':' . $field, $item);
+
+        }
+
+        $result->executeQuery();
 
         $node_id = $this->db->lastInsertId();
 
@@ -242,28 +238,25 @@ class DbTree
      */
     public function MoveAll($set_table, $nodeId, $parentId, $condition = '')
     {
-		$parentId = ((int)$parentId === -1) ? 0 : (int)$parentId;
-		
-		
-		
+        $parentId = ((int)$parentId === -1) ? 0 : (int)$parentId;
+
+
         $node_info = $this->GetNode($set_table, $nodeId);
 
         $left_id = $node_info["lft"];
         $right_id = $node_info["rgt"];
         $level = $node_info["level"];
-		
-		$SQLInsert = "UPDATE " . $set_table  ." SET `parent_id` = :parentId WHERE id = :id";
-		$result = $this->db->prepare($SQLInsert);
-		$result->bindParam(':id', $nodeId);
-		$result->bindParam(':parentId', $parentId);
-		$result->execute();
-		
+
+        $SQLInsert = "UPDATE " . $set_table . " SET `parent_id` = :parentId WHERE id = :id";
+        $result = $this->db->prepare($SQLInsert);
+        $result->bindParam(':id', $nodeId);
+        $result->bindParam(':parentId', $parentId);
+        $result->execute();
+
 
         $node_info = $this->GetNode($set_table, $parentId);
 
 
-		
-		
         $left_idp = $node_info["lft"];
         $right_idp = $node_info["rgt"];
         $levelp = $node_info["level"];
@@ -300,10 +293,10 @@ class DbTree
             $sql .= 'OR rgt BETWEEN ' . $left_id . ' AND ' . $right_idp . ')';
         }
         $sql .= $condition;
-		
-		$result = $this->db->prepare($sql);
-		
-		$result->execute();
+
+        $result = $this->db->prepare($sql);
+
+        $result->execute();
 
         return;
     }
@@ -448,16 +441,16 @@ class DbTree
         $sql .= 'WHEN lft > ' . $right_id . ' THEN lft - 2 ELSE lft END ';
         $sql .= 'WHERE rgt > ' . $left_id;
         $sql .= $condition;
-        
-		$result = $this->db->prepare($sql);
-		$result->execute();
-		
-		$result = $this->db->prepare("UPDATE " . $set_table . " SET parent_id = ".$node_info['parent_id']." WHERE parent_id = :id");
-		$result->bindParam(':id', $node_info['id']);
-		
-		$result->execute();
 
-        return ;
+        $result = $this->db->prepare($sql);
+        $result->execute();
+
+        $result = $this->db->prepare("UPDATE " . $set_table . " SET parent_id = " . $node_info['parent_id'] . " WHERE parent_id = :id");
+        $result->bindParam(':id', $node_info['id']);
+
+        $result->execute();
+
+        return;
     }
 
     /**

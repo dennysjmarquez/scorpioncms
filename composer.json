@@ -11,7 +11,9 @@
 	}
 	],
 	"require": {
-		"doctrine/dbal": "2.13.9"
+		"doctrine/dbal": "3.7.1",
+		"ext-pdo": "*",
+		"ext-ctype": "*"
 	},
 	"autoload":{
 		"psr-4":{

@@ -10,15 +10,16 @@ $config = new \Doctrine\DBAL\Configuration();
 $connections = $configDB["connections"];
 $default = $configDB["default"];
 $connection = $connections[$default];
-$dbh = \Doctrine\DBAL\DriverManager::getConnection($connection, $config);
+$dbh = \Doctrine\DBAL\DriverManager::getConnection($connection, $config)
+    //->createQueryBuilder();
 
 
-/*  
+/*
 
-	Esto de aquí abajo es un posible para cachear la DB en archivos en el disco Duro 
-	
+	Esto de aquí abajo es un posible para cachear la DB en archivos en el disco Duro
+
 	A desarrollar en un futuro :)
- 
+
 
 */
 

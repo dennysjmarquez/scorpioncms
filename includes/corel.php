@@ -176,7 +176,6 @@ class Corel {
 
 					}else if(count($EstructuraSegmentada) == 2 && $adondeVoy['modulo'] == $this->suf_post){
 
-
 						if($this->Query->GetPost($EstructuraSegmentada[1], "single")){
 
 							$this->is_single = true;
