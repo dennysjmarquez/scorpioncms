@@ -12,7 +12,7 @@ Scorpion CMS-Blogger
 
 Demo: http://scorpioncms.byethost12.com/
 
-Área del administrador: <https://scorpioncms.herokuapp.com/admin/>
+Área del administrador: [http://scorpioncms.byethost12.com/admin/](http://scorpioncms.byethost12.com/admin/)
 
 Instalación e instrucción
 -------------------------
